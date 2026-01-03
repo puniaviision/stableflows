@@ -17,19 +17,19 @@ async function main() {
   // 1. Fetch fresh data
   console.log('1. Fetching fresh data from DeFi Llama...');
   const snapshot = await fetchChainData();
-  saveSnapshot(snapshot);
+  await saveSnapshot(snapshot);
   console.log(`   ✓ Fetched data for ${snapshot.chains.length} chains\n`);
 
   // 2. Get previous week's data for comparison
   console.log('2. Getting historical data for comparison...');
-  const weeklySnapshots = getWeeklySnapshots(2);
+  const weeklySnapshots = await getWeeklySnapshots(2);
   const previousSnapshot = weeklySnapshots.length > 1 ? weeklySnapshots[0] : null;
   console.log(`   ✓ Found ${previousSnapshot ? 'previous week data' : 'no previous data'}\n`);
 
   // 3. Generate AI analysis
   console.log('3. Generating AI analysis...');
   const analysis = await generateWeeklyAnalysis(snapshot, previousSnapshot);
-  saveAnalysis(analysis);
+  await saveAnalysis(analysis);
   console.log('   ✓ Generated insights:');
   analysis.bullets.forEach((b, i) => console.log(`     ${i + 1}. ${b.slice(0, 80)}...`));
   console.log();

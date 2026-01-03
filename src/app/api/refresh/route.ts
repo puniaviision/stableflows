@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     // Check if we have recent data (within last hour)
-    const existing = getLatestSnapshot();
+    const existing = await getLatestSnapshot();
     const now = new Date();
 
     if (existing) {
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     // Fetch fresh data
     console.log('Fetching fresh data from DeFi Llama...');
     const snapshot = await fetchChainData();
-    saveSnapshot(snapshot);
+    await saveSnapshot(snapshot);
 
     return NextResponse.json({
       status: 'refreshed',
