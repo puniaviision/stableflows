@@ -1,17 +1,42 @@
-import { kv } from '@vercel/kv';
+import { put, list, del } from '@vercel/blob';
 import { SnapshotData, WeeklyAnalysis } from './constants';
 
-// Keys for KV storage
-const SNAPSHOTS_KEY = 'stableflows:snapshots';
-const ANALYSIS_KEY = 'stableflows:analyses';
+// Blob paths
+const SNAPSHOTS_PATH = 'stableflows/snapshots.json';
+const ANALYSIS_PATH = 'stableflows/analyses.json';
+
+// Helper to fetch JSON from blob URL
+async function fetchBlobJson<T>(url: string): Promise<T | null> {
+  try {
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+// Find blob by pathname
+async function findBlob(pathname: string): Promise<string | null> {
+  try {
+    const { blobs } = await list({ prefix: pathname });
+    const blob = blobs.find(b => b.pathname === pathname);
+    return blob?.url || null;
+  } catch (error) {
+    console.error('Failed to list blobs:', error);
+    return null;
+  }
+}
 
 // Load all historical snapshots
 export async function loadSnapshots(): Promise<SnapshotData[]> {
   try {
-    const data = await kv.get<SnapshotData[]>(SNAPSHOTS_KEY);
+    const url = await findBlob(SNAPSHOTS_PATH);
+    if (!url) return [];
+    const data = await fetchBlobJson<SnapshotData[]>(url);
     return data || [];
   } catch (error) {
-    console.error('Failed to load snapshots from KV:', error);
+    console.error('Failed to load snapshots from Blob:', error);
     return [];
   }
 }
@@ -38,9 +63,18 @@ export async function saveSnapshot(snapshot: SnapshotData): Promise<void> {
     cutoff.setDate(cutoff.getDate() - 365);
     const filtered = snapshots.filter(s => new Date(s.timestamp) >= cutoff);
 
-    await kv.set(SNAPSHOTS_KEY, filtered);
+    // Delete old blob if exists, then upload new one
+    const existingUrl = await findBlob(SNAPSHOTS_PATH);
+    if (existingUrl) {
+      await del(existingUrl);
+    }
+
+    await put(SNAPSHOTS_PATH, JSON.stringify(filtered), {
+      access: 'public',
+      addRandomSuffix: false,
+    });
   } catch (error) {
-    console.error('Failed to save snapshot to KV:', error);
+    console.error('Failed to save snapshot to Blob:', error);
     throw error;
   }
 }
@@ -97,10 +131,12 @@ export async function getWeeklySnapshots(weeks: number = 12): Promise<SnapshotDa
 // Load weekly analyses
 export async function loadAnalyses(): Promise<WeeklyAnalysis[]> {
   try {
-    const data = await kv.get<WeeklyAnalysis[]>(ANALYSIS_KEY);
+    const url = await findBlob(ANALYSIS_PATH);
+    if (!url) return [];
+    const data = await fetchBlobJson<WeeklyAnalysis[]>(url);
     return data || [];
   } catch (error) {
-    console.error('Failed to load analyses from KV:', error);
+    console.error('Failed to load analyses from Blob:', error);
     return [];
   }
 }
@@ -113,9 +149,19 @@ export async function saveAnalysis(analysis: WeeklyAnalysis): Promise<void> {
 
     // Keep only last 52 weeks of analyses
     const trimmed = analyses.slice(-52);
-    await kv.set(ANALYSIS_KEY, trimmed);
+
+    // Delete old blob if exists, then upload new one
+    const existingUrl = await findBlob(ANALYSIS_PATH);
+    if (existingUrl) {
+      await del(existingUrl);
+    }
+
+    await put(ANALYSIS_PATH, JSON.stringify(trimmed), {
+      access: 'public',
+      addRandomSuffix: false,
+    });
   } catch (error) {
-    console.error('Failed to save analysis to KV:', error);
+    console.error('Failed to save analysis to Blob:', error);
     throw error;
   }
 }
