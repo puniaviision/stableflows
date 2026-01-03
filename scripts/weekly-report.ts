@@ -245,45 +245,91 @@ function generateTwitterPost(data: SnapshotData, insights: string[]): string {
   const { totals, chains } = data;
   const top3 = chains.slice(0, 3);
 
-  return `Weekly Stablecoin Flows Update
+  return `Weekly Stablecoin Flows 🧵
 
-${formatCurrency(totals.stableTvl)} deployed across DeFi
-${formatPercent(totals.utilPercent)} capital utilization
+${formatCurrency(totals.stableTvl)} in stablecoins deployed across DeFi
 
-Top 3:
+Top chains:
 1. ${top3[0].chain}: ${formatCurrency(top3[0].stableTvl)}
 2. ${top3[1].chain}: ${formatCurrency(top3[1].stableTvl)}
 3. ${top3[2].chain}: ${formatCurrency(top3[2].stableTvl)}
 
 ${insights[0]}
 
-Full data: stableflows.finance`;
+Full dashboard: stableflows.finance`;
 }
 
 // Generate LinkedIn post
 function generateLinkedInPost(data: SnapshotData, insights: string[]): string {
   const { totals, chains } = data;
+  const top5 = chains.slice(0, 5);
 
-  return `Weekly Stablecoin Flows Report
+  return `Weekly Stablecoin Flows Update
 
-Tracking real capital deployment across DeFi - where USDC, USDT, and PYUSD are actually being used.
+${formatCurrency(totals.stableTvl)} in USDC, USDT, and PYUSD currently deployed across DeFi protocols.
 
-Key Metrics:
-- Total Stable TVL: ${formatCurrency(totals.stableTvl)}
-- Capital Utilization: ${formatPercent(totals.utilPercent)}
-- Stablecoin/DeFi Ratio: ${formatPercent(totals.stblDefiPercent)}
+Top 5 Chains:
+${top5.map(c => `• ${c.chain}: ${formatCurrency(c.stableTvl)}`).join('\n')}
 
-Top Chains by Stable TVL:
-${chains.slice(0, 5).map(c => `${c.rank}. ${c.chain}: ${formatCurrency(c.stableTvl)} (${formatPercent(c.utilPercent)} util)`).join('\n')}
+Key Insights:
+${insights.map(i => `• ${i}`).join('\n')}
 
-Insights:
-${insights.map((i, idx) => `${idx + 1}. ${i}`).join('\n')}
+Why track stablecoin flows? They're a cleaner signal of real economic activity than speculative TVL metrics.
 
-Stablecoin flows are a cleaner signal of real economic activity than speculative TVL metrics.
+Full data: stableflows.finance
 
-Full dashboard: stableflows.finance
+#DeFi #Stablecoins #Crypto`;
+}
 
-#DeFi #Stablecoins #Crypto #Web3`;
+// Generate Substack newsletter
+function generateSubstackPost(data: SnapshotData, insights: string[], dateStr: string): string {
+  const { totals, chains } = data;
+
+  // Find interesting movers for narrative
+  const top = chains[0];
+  const topShare = ((top.stableTvl / totals.stableTvl) * 100).toFixed(0);
+
+  return `# Weekly Stablecoin Flows
+
+*${dateStr}*
+
+---
+
+## The Numbers
+
+**${formatCurrency(totals.stableTvl)}** in stablecoins deployed across DeFi this week.
+
+${top.chain} continues to dominate with ${formatCurrency(top.stableTvl)} (${topShare}% of total stable TVL).
+
+| Chain | Stable TVL | Stbl/DeFi |
+|-------|-----------|-----------|
+${chains.map(c => `| ${c.chain} | ${formatCurrency(c.stableTvl)} | ${formatPercent(c.stblDefiPercent)} |`).join('\n')}
+
+---
+
+## Key Insights
+
+${insights.map((insight, i) => `**${i + 1}.** ${insight}`).join('\n\n')}
+
+---
+
+## What This Means
+
+Stablecoin flows tell us where real capital is being deployed - not speculative token valuations, but actual dollars at work in DeFi.
+
+When you see ${formatCurrency(totals.stableTvl)} in stablecoins actively deployed, that's ${formatCurrency(totals.stableTvl)} of real economic activity.
+
+---
+
+## Explore the Data
+
+Full interactive dashboard: [stableflows.finance](https://stableflows.finance)
+
+---
+
+*Built by [Punia](https://x.com/puniaviision) at Underwriting Crypto*
+
+[screenshot of stableflows.finance dashboard here]`;
 }
 
 // Main
@@ -336,24 +382,31 @@ async function main() {
     `      TOTAL        ${formatCurrency(data.totals.stableTvl).padStart(12)}  ${formatPercent(data.totals.utilPercent).padStart(8)}  ${formatPercent(data.totals.stblDefiPercent).padStart(10)}`
   );
 
-  // Print social posts
+  // Print templates
   console.log('\n');
   console.log('='.repeat(60));
-  console.log('TWITTER POST (copy below)');
+  console.log('TWITTER (copy below)');
   console.log('='.repeat(60));
   console.log();
   console.log(generateTwitterPost(data, insights));
 
   console.log('\n');
   console.log('='.repeat(60));
-  console.log('LINKEDIN POST (copy below)');
+  console.log('LINKEDIN (copy below)');
   console.log('='.repeat(60));
   console.log();
   console.log(generateLinkedInPost(data, insights));
 
   console.log('\n');
   console.log('='.repeat(60));
-  console.log('Done! Copy the posts above and share.');
+  console.log('SUBSTACK (copy below - paste into Substack editor)');
+  console.log('='.repeat(60));
+  console.log();
+  console.log(generateSubstackPost(data, insights, dateStr));
+
+  console.log('\n');
+  console.log('='.repeat(60));
+  console.log('DONE! Remember to screenshot stableflows.finance for visuals.');
   console.log('='.repeat(60));
 }
 
