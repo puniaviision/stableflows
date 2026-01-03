@@ -1,8 +1,8 @@
-# stableflows.xyz
+# stableflows.finance
 
 Track stablecoin flows across DeFi. Real capital. No noise.
 
-**Live:** [stableflows.xyz](https://stableflows.xyz)
+**Live:** [stableflows.finance](https://stableflows.finance)
 
 ## What is this?
 
