@@ -57,7 +57,7 @@ npm run dev
 ### Cron Jobs
 
 Configured in `vercel.json`:
-- **Daily snapshot:** Every 6 hours (`/api/cron/daily`)
+- **Daily snapshot:** Once daily at midnight UTC (`/api/cron/daily`)
 
 ## Data Methodology
 
