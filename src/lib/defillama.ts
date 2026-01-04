@@ -7,6 +7,35 @@ const YIELDS_API = 'https://yields.llama.fi/pools';
 // Target stablecoins for TVL calculation
 const TARGET_STABLES = new Set(['USDC', 'USDT', 'PYUSD']);
 
+// Valid stablecoin symbol patterns (base tokens and known bridged versions)
+// This prevents counting vault tokens like VBUSDC, GTUSDC, yvUSDC, etc.
+const VALID_STABLE_PATTERNS: RegExp[] = [
+  // Exact matches
+  /^USDC$/i,
+  /^USDT$/i,
+  /^PYUSD$/i,
+  // Common bridged/wrapped versions (prefix)
+  /^(axl|wh|mul|star|lz)?USDC(\.e)?$/i,
+  /^(axl|wh|mul|star|lz)?USDT(\.e)?$/i,
+  /^(axl|wh|mul|star|lz)?PYUSD(\.e)?$/i,
+  // USDC/USDT with chain suffix
+  /^USDC\.[a-z]+$/i,
+  /^USDT\.[a-z]+$/i,
+  // Stargate versions (USDT0, USD₮0)
+  /^USDT0$/i,
+  /^USD₮0$/i,
+  // Simple wrapped versions
+  /^WUSDC$/i,
+  /^WUSDT$/i,
+];
+
+/**
+ * Check if a symbol component is a valid stablecoin (not a vault token)
+ */
+function isValidStablecoin(symbol: string): boolean {
+  return VALID_STABLE_PATTERNS.some(pattern => pattern.test(symbol));
+}
+
 // Chain name normalization (API uses different names sometimes)
 const CHAIN_NAME_MAP: Record<string, string> = {
   'Binance': 'BSC',
@@ -29,22 +58,10 @@ function normalizeChainName(name: string): string {
 /**
  * Calculate the portion of a pool's TVL attributable to target stablecoins.
  *
- * For single-asset pools: 100% if it's a target stable
- * For multi-asset pools: Proportional split based on symbol parsing
+ * For single-asset pools: 100% if it's a valid stablecoin (not a vault token)
+ * For multi-asset pools: Proportional split based on valid stablecoin components
  */
 function calculateStablecoinShare(symbol: string, tvl: number, exposure: string): number {
-  const symbolUpper = symbol.toUpperCase();
-
-  // Check if any target stable is present
-  const hasTarget = Array.from(TARGET_STABLES).some(stable => symbolUpper.includes(stable));
-  if (!hasTarget) return 0;
-
-  // Single asset pool - count 100%
-  if (exposure === 'single') {
-    return tvl;
-  }
-
-  // Multi-asset pool - proportional split
   // Parse symbol into components, filtering out fee tiers (numbers)
   const parts = symbol
     .replace(/\//g, '-')
@@ -54,12 +71,19 @@ function calculateStablecoinShare(symbol: string, tvl: number, exposure: string)
     .filter(p => p.length > 0 && !/^\d+$/.test(p));
 
   if (parts.length === 0) return 0;
-  if (parts.length === 1) return tvl;
 
-  // Count how many target stables are in the symbol
-  const targetCount = Array.from(TARGET_STABLES).filter(stable => symbolUpper.includes(stable)).length;
+  // Count valid stablecoins in the symbol (excludes vault tokens)
+  const validStableCount = parts.filter(part => isValidStablecoin(part)).length;
 
-  return tvl * (targetCount / parts.length);
+  if (validStableCount === 0) return 0;
+
+  // Single asset pool - count 100% only if it's a valid stablecoin
+  if (exposure === 'single' || parts.length === 1) {
+    return isValidStablecoin(parts[0]) ? tvl : 0;
+  }
+
+  // Multi-asset pool - proportional split based on valid stablecoins
+  return tvl * (validStableCount / parts.length);
 }
 
 /**
