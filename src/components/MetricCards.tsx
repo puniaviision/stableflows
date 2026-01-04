@@ -39,7 +39,7 @@ function Tooltip({ text }: { text: string }) {
         </svg>
       </button>
       {show && (
-        <div className="tooltip-content -left-[132px] top-7">
+        <div className="tooltip-content left-0 sm:-left-[132px] top-7 w-[240px] sm:w-[280px]">
           {text}
         </div>
       )}

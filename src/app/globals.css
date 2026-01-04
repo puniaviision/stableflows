@@ -263,11 +263,22 @@ body::before {
   background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 4px;
 }
 
 .data-table {
   width: 100%;
+  min-width: 700px;
   border-collapse: collapse;
 }
 
@@ -538,7 +549,6 @@ body::before {
 .tooltip-content {
   position: absolute;
   z-index: 100;
-  width: 280px;
   padding: 12px 14px;
   background: var(--bg-elevated);
   border: 1px solid var(--border-default);
@@ -742,4 +752,166 @@ a:focus-visible {
 ::selection {
   background: var(--accent-primary);
   color: var(--bg-primary);
+}
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Container padding */
+  .container {
+    padding: 0 16px;
+  }
+
+  /* Header adjustments */
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 0;
+  }
+
+  .logo-section h1 {
+    font-size: 18px;
+  }
+
+  .status-section {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Metric card adjustments */
+  .metric-card {
+    padding: 16px;
+  }
+
+  .metric-value {
+    font-size: 22px;
+  }
+
+  .metric-label {
+    font-size: 11px;
+  }
+
+  .metric-change {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+
+  /* Card adjustments */
+  .card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  /* Chart card adjustments */
+  .chart-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .chart-title {
+    font-size: 12px;
+  }
+
+  /* Table adjustments */
+  .data-table th {
+    padding: 12px 10px;
+    font-size: 9px;
+  }
+
+  .data-table td {
+    padding: 12px 10px;
+    font-size: 12px;
+  }
+
+  .chain-indicator {
+    gap: 8px;
+  }
+
+  .chain-name {
+    font-size: 13px;
+  }
+
+  .rank-badge {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .change-badge {
+    font-size: 10px;
+    padding: 2px 4px;
+    margin-left: 4px;
+  }
+
+  /* Section headers */
+  .section-title {
+    font-size: 13px;
+  }
+
+  .section-header {
+    margin-bottom: 16px;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 32px 16px;
+    margin-top: 48px;
+  }
+
+  /* Modal adjustments */
+  .modal-container {
+    padding: 16px;
+  }
+
+  .modal-content {
+    border-radius: 16px;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-title {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Tooltip adjustments for mobile - align arrow to left */
+  .tooltip-content::before {
+    left: 14px;
+    transform: rotate(45deg);
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens */
+  .metric-value {
+    font-size: 20px;
+  }
+
+  .logo-section h1 {
+    font-size: 16px;
+    letter-spacing: 0.08em;
+  }
+
+  .logo-section p {
+    font-size: 12px;
+  }
+
+  .live-indicator {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  .last-updated {
+    font-size: 11px;
+  }
 }

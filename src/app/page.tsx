@@ -48,9 +48,9 @@ export default async function Home() {
     <div className="min-h-screen">
       <Header lastUpdated={snapshot.timestamp} />
 
-      <main className="max-w-7xl mx-auto px-6 lg:px-10 py-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10">
         {/* Metric Cards */}
-        <section className="mb-10">
+        <section className="mb-6 sm:mb-10">
           <MetricCards
             totals={snapshot.totals}
             previousTotals={previousSnapshot?.totals}
@@ -59,13 +59,13 @@ export default async function Home() {
 
         {/* Weekly Analysis */}
         {analysis && (
-          <section className="mb-10">
+          <section className="mb-6 sm:mb-10">
             <AnalysisBullets analysis={analysis} />
           </section>
         )}
 
         {/* Data Table */}
-        <section className={showCharts ? "mb-10" : ""}>
+        <section className={showCharts ? "mb-6 sm:mb-10" : ""}>
           <div className="section-header">
             <h2 className="section-title">Chain Rankings</h2>
             <p className="section-subtitle">Ranked by Stable TVL (USDC + USDT + PYUSD in DeFi)</p>
