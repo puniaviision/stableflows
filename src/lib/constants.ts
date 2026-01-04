@@ -12,7 +12,6 @@ export const TRACKED_CHAINS = [
   'Aptos',
   'Sui',
   'Plasma',
-  'Katana',
 ] as const;
 
 // Map chain names to DeFi Llama slugs (some differ)
@@ -29,7 +28,6 @@ export const CHAIN_SLUGS: Record<string, string> = {
   'Aptos': 'aptos',
   'Sui': 'sui',
   'Plasma': 'plasma',
-  'Katana': 'katana',
 };
 
 // Stablecoins to include in Stable TVL

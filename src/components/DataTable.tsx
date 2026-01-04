@@ -29,7 +29,6 @@ const chainColors: Record<string, string> = {
   'Aptos': '#66CDAA',
   'Sui': '#6FBCF0',
   'Plasma': '#E040FB',
-  'Katana': '#FF6B6B',
 };
 
 function ChangeIndicator({ current, previous }: { current: number; previous?: number }) {
